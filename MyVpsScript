@@ -1,1 +1,122 @@
-curl -sL https://githubusercontent.com | bash
+#!/bin/bash
+
+# ====================================================================
+# PROJECT:   AUTOMATED PREMIUM VPN / PROXY SERVER DEPLOYMENT
+# DEVELOPER: Henok Yonatan (Heni John)
+# CONTACT:   https://t.me/Heni_John
+# STATUS:    Privately Owned & Maintained Infrastructure
+# SYSTEM:    Optimized for Ubuntu 20.04+ / Debian 11+
+# ====================================================================
+
+# Stop execution immediately if any command encounters an error
+set -e
+
+# ANSI Color codes for beautiful UI styling
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Function to print beautiful animated progress bars
+print_progress() {
+    local message="$1"
+    echo -ne "${CYAN}[*] ${message}...${NC}\n"
+    echo -ne "${BLUE}[========================================] (100%)${NC}\n\n"
+    sleep 1
+}
+
+# Clear screen and display your beautiful custom developer branding banner
+clear
+echo -e "${MAGENTA}${BOLD}====================================================================${NC}"
+echo -e "${CYAN}${BOLD}  _____  ______     ________ _      ____  _____  ______ _____       ${NC}"
+echo -e "${CYAN}${BOLD} |  __ \|  ____|   |  ____  | |    / __ \|  __ \|  ____|  __ \      ${NC}"
+echo -e "${CYAN}${BOLD} | |  | | |__      | |__  | | |   | |  | | |__) | |__  | |__) |     ${NC}"
+echo -e "${CYAN}${BOLD} | |  | |  __|     |  __| | | |   | |  | |  ___/|  __| |  _  /      ${NC}"
+echo -e "${CYAN}${BOLD} | |__| | |____    | |____| | |___| |__| | |    | |____| | \ \      ${NC}"
+echo -e "${CYAN}${BOLD} |_____/|______|   |______|_|______\____/|_|    |______|_|  \_\\     ${NC}"
+echo -e "${MAGENTA}${BOLD}====================================================================${NC}"
+echo -e "${YELLOW}${BOLD} DEVELOPER:${NC} ${GREEN}Developed By Henok Yonatan (Heni John)${NC}"
+echo -e "${YELLOW}${BOLD} CONTACT:${NC}   ${BLUE}https://t.me{NC}"
+echo -e "${YELLOW}${BOLD} STATUS:${NC}    ${CYAN}Initializing Premium Server Protocol...${NC}"
+echo -e "${MAGENTA}${BOLD}====================================================================${NC}"
+echo ""
+
+# 1. Update system repositories and pull in critical system binaries
+echo -e "${YELLOW}[*] Phase 1: Refreshing system software resources...${NC}"
+apt-get update -y > /dev/null 2>&1
+apt-get install -y curl wget tmux dnsutils stunnel4 squid openssl > /dev/null 2>&1
+print_progress "Core packages network utilities installed successfully"
+
+# 2. Safely purge conflicting web server software if it is pre-installed
+if systemctl is-active --quiet apache2; then
+    echo -e "${RED}[!] Removing conflicting Apache2 web server stack...${NC}"
+    apt-get --purge remove apache2 -y > /dev/null 2>&1
+fi
+
+# 3. Provision secure Stunnel parameters (Forwarding port 444 into internal SSH)
+echo -e "${YELLOW}[*] Phase 2: Deploying encrypted Stunnel configurations...${NC}"
+cat <<EOF > /etc/stunnel/stunnel.conf
+pid = /var/run/stunnel.pid
+cert = /etc/stunnel/stunnel.pem
+
+[ssh]
+accept = 444
+connect = 127.0.0.1:109
+EOF
+
+# 4. Generate a unique, long-term SSL/TLS certificate for your secure wrapper
+openssl req -new -x509 -days 3650 -nodes \
+    -out /etc/stunnel/stunnel.pem \
+    -keyout /etc/stunnel/stunnel.pem \
+    -subj "/CN=Henok-Yonatan-Heni-John" 2>/dev/null
+print_progress "Cryptographic SSL/TLS certificates configured (Port 444)"
+
+# 5. Bootstrap the boot framework to enable and spin up the Stunnel daemon
+sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
+systemctl daemon-reload
+systemctl enable stunnel4 > /dev/null 2>&1
+systemctl restart stunnel4
+
+# 6. Initialize global Squid proxy profiles handling routing via port 8080
+echo -e "${YELLOW}[*] Phase 3: Writing global Squid proxy rules...${NC}"
+cat <<EOF > /etc/squid/squid.conf
+http_port 8080
+http_access allow all
+EOF
+systemctl enable squid > /dev/null 2>&1
+systemctl restart squid
+print_progress "Squid high-speed proxy deployment completed (Port 8080)"
+
+# 7. Modify SSH configurations to output an identifying greeting message banner
+echo -e "${YELLOW}[*] Phase 4: Appending premium terminal security flags...${NC}"
+sed -i '/Banner/d' /etc/ssh/sshd_config
+echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
+
+# Craft the persistent text banner shown every time a user logs into the terminal
+cat <<EOF > /etc/issue.net
+====================================================================
+      WELCOME TO THE PRIVATE SECURE CLOUD NETWORK ARCHITECTURE     
+               Developed By Henok Yonatan (Heni John)             
+====================================================================
+ Unauthorized access to this infrastructure is strictly prohibited.
+ For support or access inquiries, contact the official developer:
+ Telegram: https://t.me/Heni_John
+====================================================================
+EOF
+
+# Restart the localized secure shell daemon to enforce configuration state changes
+systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null
+print_progress "Secure Shell daemon subsystem successfully refreshed"
+
+# 8. Finalization Confirmation
+echo ""
+echo -e "${GREEN}${BOLD}====================================================================${NC}"
+echo -e "${GREEN}${BOLD}  SUCCESS: Premium Server Setup Finalized Successfully!             ${NC}"
+echo -e "${YELLOW}${BOLD}  DEVELOPER:${NC} ${CYAN}Developed By Henok Yonatan (Heni John)${NC}"
+echo -e "${YELLOW}${BOLD}  CONTACT:  ${NC} ${BLUE}https://t.me{NC}"
+echo -e "${GREEN}${BOLD}====================================================================${NC}"
+echo ""
