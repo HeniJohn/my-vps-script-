@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# ====================================================================
+# PROJECT:   AUTOMATED CUSTOM VPN / PROXY SERVER DEPLOYMENT
+# DEVELOPER: Henok Yonatan (Heni John)
+# CONTACT:   https://t.me/Heni_John
+# STATUS:    Privately Owned & Maintained Infrastructure
+# SYSTEM:    Optimized for Ubuntu 20.04+ / Debian 11+
+# ====================================================================
+
+# Stop execution immediately if any command encounters an error
+set -e
+
+# Clear screen and display your custom developer branding banner
+clear
+echo "===================================================================="
+echo "  _____  ______     ________ _      ____  _____  ______ _____ "
+echo " |  __ \|  ____|   |  ____  | |    / __ \|  __ \|  ____|  __ \ "
+echo " | |  | | |__      | |__  | | |   | |  | | |__) | |__  | |__) |"
+echo " | |  | |  __|     |  __| | | |   | |  | |  ___/|  __| |  _  / "
+echo " | |__| | |____    | |____| | |___| |__| | |    | |____| | \ \ "
+echo " |_____/|______|   |______|_|______\____/|_|    |______|_|  \_\\"
+echo "===================================================================="
+echo " DEVELOPER: Developed By Henok Yonatan (Heni John)"
+echo " CONTACT:   https://t.me/Heni_John"
+echo " STATUS:    Initializing Secure Server Protocol..."
+echo "===================================================================="
+echo ""
+
+# 1. Update system repositories and pull in critical system binaries
+echo "[*] Phase 1: Refreshing system software resources..."
+apt-get update
+apt-get install -y curl wget tmux dnsutils stunnel4 squid openssl
+
+# 2. Safely purge conflicting web server software if it is pre-installed
+if systemctl is-active --quiet apache2; then
+    echo "[*] Removing conflicting Apache2 web server stack..."
+    apt-get --purge remove apache2 -y
+fi
+
+# 3. Provision secure Stunnel parameters (Forwarding port 444 into internal SSH)
+echo "[*] Phase 2: Deploying encrypted Stunnel configurations..."
+cat <<EOF > /etc/stunnel/stunnel.conf
+pid = /var/run/stunnel.pid
+cert = /etc/stunnel/stunnel.pem
+
+[ssh]
+accept = 444
+connect = 127.0.0.1:109
+EOF
+
+# 4. Generate a unique, long-term SSL/TLS certificate for your secure wrapper
+echo "[*] Generating cryptographic SSL certificates (CN=Heni_John)..."
+openssl req -new -x509 -days 3650 -nodes \
+    -out /etc/stunnel/stunnel.pem \
+    -keyout /etc/stunnel/stunnel.pem \
+    -subj "/CN=Henok-Yonatan-Heni-John" 2>/dev/null
+
+# 5. Bootstrap the boot framework to enable and spin up the Stunnel daemon
+echo "[*] Bootstrapping Stunnel service infrastructure..."
+sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
+systemctl daemon-reload
+systemctl enable stunnel4
+systemctl restart stunnel4
+
+# 6. Initialize global Squid proxy profiles handling routing via port 8080
+echo "[*] Phase 3: Writing global Squid proxy rules over Port 8080..."
+cat <<EOF > /etc/squid/squid.conf
+http_port 8080
+http_access allow all
+EOF
+systemctl enable squid
+systemctl restart squid
+
+# 7. Modify SSH configurations to output an identifying greeting message banner
+echo "[*] Phase 4: Appending secure terminal welcome greeting flags..."
+sed -i '/Banner/d' /etc/ssh/sshd_config
+echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
+
+# Craft the persistent text banner shown every time a user logs into the terminal
+cat <<EOF > /etc/issue.net
+====================================================================
+      WELCOME TO THE PRIVATE SECURE CLOUD NETWORK ARCHITECTURE     
+               Developed By Henok Yonatan (Heni John)             
+====================================================================
+ Unauthorized access to this infrastructure is strictly prohibited.
+ For support or access inquiries, contact the official developer:
+ Telegram: https://t.me/Heni_John
+====================================================================
+EOF
+
+# Restart the localized secure shell daemon to enforce configuration state changes
+systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null
+
+# 8. Finalization Confirmation
+echo ""
+echo "===================================================================="
+echo " SUCCESS: Server Setup Finalized Successfully!"
+echo " DEVELOPER: Developed By Henok Yonatan (Heni John)"
+echo " CONTACT:   https://t.me/Heni_John"
+echo "===================================================================="
