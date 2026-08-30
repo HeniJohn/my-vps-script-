@@ -4,61 +4,65 @@
 # PROJECT:   AUTOMATED PREMIUM VPN / PROXY SERVER DEPLOYMENT
 # DEVELOPER: Henok Yonatan (Heni John)
 # CONTACT:   https://t.me/Heni_John
-# STATUS:    Privately Owned & Maintained Infrastructure
-# SYSTEM:    Optimized for Ubuntu 20.04+ / Debian 11+
+# STATUS:    Optimized & Secured for Ubuntu 20.04+ / Debian 11+
 # ====================================================================
 
-# Stop execution immediately if any command encounters an error
 set -e
 
-# ANSI Color codes for beautiful UI styling
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-MAGENTA='\033[0;35m'
-CYAN='\033[0;36m'
+# Modern Color Palette & Styling
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+PURPLE='\033[1;35m'
+CYAN='\033[1;36m'
+WHITE='\033[1;37m'
 BOLD='\033[1m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to print beautiful animated progress bars
-print_progress() {
-    local message="$1"
-    echo -ne "${CYAN}[*] ${message}...${NC}\n"
-    echo -ne "${BLUE}[========================================] (100%)${NC}\n\n"
-    sleep 1
+# Animated Modern Loading Indicator
+print_status() {
+    local text="$1"
+    echo -e "${CYAN}[⚡] ${WHITE}${text}${NC}"
+    sleep 0.5
 }
 
-# Clear screen and display your beautiful custom developer branding banner
+# Clear Screen & Render Sleek Modern Banner
 clear
-echo -e "${MAGENTA}${BOLD}====================================================================${NC}"
-echo -e "${CYAN}${BOLD}  _____  ______     ________ _      ____  _____  ______ _____       ${NC}"
-echo -e "${CYAN}${BOLD} |  __ \|  ____|   |  ____  | |    / __ \|  __ \|  ____|  __ \      ${NC}"
-echo -e "${CYAN}${BOLD} | |  | | |__      | |__  | | |   | |  | | |__) | |__  | |__) |     ${NC}"
-echo -e "${CYAN}${BOLD} | |  | |  __|     |  __| | | |   | |  | |  ___/|  __| |  _  /      ${NC}"
-echo -e "${CYAN}${BOLD} | |__| | |____    | |____| | |___| |__| | |    | |____| | \ \      ${NC}"
-echo -e "${CYAN}${BOLD} |_____/|______|   |______|_|______\____/|_|    |______|_|  \_\\     ${NC}"
-echo -e "${MAGENTA}${BOLD}====================================================================${NC}"
-echo -e "${YELLOW}${BOLD} DEVELOPER:${NC} ${GREEN}Developed By Henok Yonatan (Heni John)${NC}"
-echo -e "${YELLOW}${BOLD} CONTACT:${NC}   ${BLUE}https://t.me{NC}"
-echo -e "${YELLOW}${BOLD} STATUS:${NC}    ${CYAN}Initializing Premium Server Protocol...${NC}"
-echo -e "${MAGENTA}${BOLD}====================================================================${NC}"
+echo -e "${PURPLE}${BOLD}╔══════════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}${BOLD}║  _    _                  _______        _      _____           ║${NC}"
+echo -e "${CYAN}${BOLD}║ | |  | |                 |__   __|      | |    |  __ \          ║${NC}  
+echo -e "${CYAN}${BOLD}║ | |__| | ___ _ __  _   _    | | ___  ___| |__  | |  | |         ║${NC}"
+echo -e "${CYAN}${BOLD}║ |  __  |/ _ \ '_ \| | | |   | |/ _ \/ __| '_ \ | |  | |         ║${NC}"
+echo -e "${CYAN}${BOLD}║ | |  | |  __/ | | | |_| |   | |  __/ (__| | | || |__| |         ║${NC}"
+echo -e "${CYAN}${BOLD}║ |_|  |_|\___|_| |_|\__,_|   |_|\___|\___|_| |_||_____/          ║${NC}"
+echo -e "${PURPLE}${BOLD}╚══════════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${YELLOW}${BOLD} 👑 DEVELOPER :${NC} ${GREEN}Henok Yonatan (Heni John)${NC}"
+echo -e "${YELLOW}${BOLD} 📱 TELEGRAM  :${NC} ${BLUE}https://t.me/Heni_John${NC}"
+echo -e "${YELLOW}${BOLD} 🚀 STATUS    :${NC} ${CYAN}Initializing Secure Architecture...${NC}"
+echo -e "${PURPLE}${BOLD}══════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# 1. Update system repositories and pull in critical system binaries
-echo -e "${YELLOW}[*] Phase 1: Refreshing system software resources...${NC}"
+# Phase 1: System Update & Core Binaries Installation
+print_status "Phase 1: Updating repositories and installing core packages..."
 apt-get update -y > /dev/null 2>&1
-apt-get install -y curl wget tmux dnsutils stunnel4 squid openssl > /dev/null 2>&1
-print_progress "Core packages network utilities installed successfully"
+apt-get install -y curl wget tmux dnsutils stunnel4 squid dropbear openssl > /dev/null 2>&1
+echo -e "${GREEN}✔ Core system binaries and Dropbear installed successfully.${NC}\n"
 
-# 2. Safely purge conflicting web server software if it is pre-installed
-if systemctl is-active --quiet apache2; then
-    echo -e "${RED}[!] Removing conflicting Apache2 web server stack...${NC}"
-    apt-get --purge remove apache2 -y > /dev/null 2>&1
-fi
+# Phase 2: Configure Dropbear for Port 109 (Stunnel Backend)
+print_status "Phase 2: Configuring Dropbear backend service..."
+cat <<EOF > /etc/default/dropbear
+NO_START=0
+DROPBEAR_PORT=109
+DROPBEAR_EXTRA_ARGS=""
+DROPBEAR_BANNER="/etc/issue.net"
+EOF
+systemctl enable dropbear > /dev/null 2>&1
+systemctl restart dropbear
+echo -e "${GREEN}✔ Dropbear configured and running on port 109.${NC}\n"
 
-# 3. Provision secure Stunnel parameters (Forwarding port 444 into internal SSH)
-echo -e "${YELLOW}[*] Phase 2: Deploying encrypted Stunnel configurations...${NC}"
+# Phase 3: Configure Stunnel SSL/TLS Wrapper (Port 444 -> 109)
+print_status "Phase 3: Setting up encrypted Stunnel wrapper..."
 cat <<EOF > /etc/stunnel/stunnel.conf
 pid = /var/run/stunnel.pid
 cert = /etc/stunnel/stunnel.pem
@@ -68,55 +72,54 @@ accept = 444
 connect = 127.0.0.1:109
 EOF
 
-# 4. Generate a unique, long-term SSL/TLS certificate for your secure wrapper
+# Generate secure SSL certificate
 openssl req -new -x509 -days 3650 -nodes \
     -out /etc/stunnel/stunnel.pem \
     -keyout /etc/stunnel/stunnel.pem \
     -subj "/CN=Henok-Yonatan-Heni-John" 2>/dev/null
-print_progress "Cryptographic SSL/TLS certificates configured (Port 444)"
 
-# 5. Bootstrap the boot framework to enable and spin up the Stunnel daemon
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 systemctl daemon-reload
 systemctl enable stunnel4 > /dev/null 2>&1
 systemctl restart stunnel4
+echo -e "${GREEN}✔ Stunnel active and forwarding port 444 securely.${NC}\n"
 
-# 6. Initialize global Squid proxy profiles handling routing via port 8080
-echo -e "${YELLOW}[*] Phase 3: Writing global Squid proxy rules...${NC}"
+# Phase 4: Configure Squid High-Speed Proxy (Port 8080)
+print_status "Phase 4: Configuring Squid proxy rules..."
 cat <<EOF > /etc/squid/squid.conf
 http_port 8080
 http_access allow all
 EOF
 systemctl enable squid > /dev/null 2>&1
 systemctl restart squid
-print_progress "Squid high-speed proxy deployment completed (Port 8080)"
+echo -e "${GREEN}✔ Squid proxy deployed successfully on port 8080.${NC}\n"
 
-# 7. Modify SSH configurations to output an identifying greeting message banner
-echo -e "${YELLOW}[*] Phase 4: Appending premium terminal security flags...${NC}"
+# Phase 5: Terminal Security & Professional Banner Setup
+print_status "Phase 5: Deploying professional login banner..."
 sed -i '/Banner/d' /etc/ssh/sshd_config
 echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 
-# Craft the persistent text banner shown every time a user logs into the terminal
 cat <<EOF > /etc/issue.net
 ====================================================================
-      WELCOME TO THE PRIVATE SECURE CLOUD NETWORK ARCHITECTURE     
+          WELCOME TO HENI TECH SECURE CLOUD INFRASTRUCTURE          
                Developed By Henok Yonatan (Heni John)             
 ====================================================================
- Unauthorized access to this infrastructure is strictly prohibited.
- For support or access inquiries, contact the official developer:
+ Unauthorized access or abuse of this server is strictly prohibited.
+ Official Developer Channel & Support:
  Telegram: https://t.me/Heni_John
 ====================================================================
 EOF
 
-# Restart the localized secure shell daemon to enforce configuration state changes
 systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null
-print_progress "Secure Shell daemon subsystem successfully refreshed"
+echo -e "${GREEN}✔ Terminal banner and SSH security updated.${NC}\n"
 
-# 8. Finalization Confirmation
-echo ""
-echo -e "${GREEN}${BOLD}====================================================================${NC}"
-echo -e "${GREEN}${BOLD}  SUCCESS: Premium Server Setup Finalized Successfully!             ${NC}"
-echo -e "${YELLOW}${BOLD}  DEVELOPER:${NC} ${CYAN}Developed By Henok Yonatan (Heni John)${NC}"
-echo -e "${YELLOW}${BOLD}  CONTACT:  ${NC} ${BLUE}https://t.me{NC}"
-echo -e "${GREEN}${BOLD}====================================================================${NC}"
+# Final Success Overview Dashboard
+echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}${BOLD}║              SERVER DEPLOYMENT COMPLETED SUCCESSFULLY!           ║${NC}"
+echo -e "${GREEN}${BOLD}╠══════════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${CYAN} • Stunnel SSL Port : ${WHITE}444${NC}"
+echo -e "${CYAN} • Dropbear Port    : ${WHITE}109${NC}"
+echo -e "${CYAN} • Squid Proxy Port : ${WHITE}8080${NC}"
+echo -e "${CYAN} • Developer Contact: ${BLUE}https://t.me/Heni_John${NC}"
+echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
