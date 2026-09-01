@@ -2,63 +2,40 @@
 
 # ====================================================================
 # PROJECT:   ADVANCED AUTOMATED PREMIUM VPN / PROXY SERVER DEPLOYMENT
+# UI DESIGN: HENI JOHN SERVER PANEL — Modern Terminal UI (v2)
 # DEVELOPER: Henok Yonatan (Heni John)
 # CONTACT:   https://t.me/Heni_John
-# STATUS:    Optimized & Secured for Ubuntu 20.04+ / Debian 11+
 # ====================================================================
 
-# Clear screen & set colors
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[1;34m'
-PURPLE='\033[1;35m'
-CYAN='\033[1;36m'
-WHITE='\033[1;37m'
-BOLD='\033[1m'
+# Clear screen & set colors for installer
+CYAN='\033[38;5;80m'
+GREEN='\033[38;5;114m'
+PURPLE='\033[38;5;140m'
+WHITE='\033[1;97m'
 NC='\033[0m'
 
-print_status() {
-    local text="$1"
-    echo -e "${CYAN}[⚡] ${WHITE}${text}${NC}"
-    sleep 0.3
-}
-
 clear
-echo -e "${PURPLE}${BOLD}╔══════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║     _    _            _        _       _                         ║${NC}"
-echo -e "${CYAN}${BOLD}║    | |  | |          (_)      | |     | |                        ║${NC}"  
-echo -e "${CYAN}${BOLD}║    | |__| | ___ _ __  _       | | ___ | |__  _ __                ║${NC}"
-echo -e "${CYAN}${BOLD}║    |  __  |/ _ \ '_ \| |  _   | |/ _ \| '_ \| '_ \               ║${NC}"
-echo -e "${CYAN}${BOLD}║    | |  | |  __/ | | | | | |__| | (_) | | | | | | |              ║${NC}"
-echo -e "${CYAN}${BOLD}║    |_|  |_|\___|_| |_|_|  \____/ \___/|_| |_|_| |_|              ║${NC}"
-echo -e "${PURPLE}${BOLD}╚══════════════════════════════════════════════════════════════════╝${NC}"
-echo -e "${YELLOW}${BOLD} 👑 DEVELOPER :${NC} ${GREEN}Henok Yonatan (Heni John)${NC}"
-echo -e "${YELLOW}${BOLD} 📱 TELEGRAM  :${NC} ${BLUE}https://t.me/Heni_John${NC}"
-echo -e "${YELLOW}${BOLD} 🚀 STATUS    :${NC} ${CYAN}Deploying Ultimate Server Infrastructure...${NC}"
-echo -e "${PURPLE}${BOLD}══════════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${PURPLE}╔══════════════════════════════════════════════╗${NC}"
+echo -e "${PURPLE}║${NC}   ${GREEN}✦${NC} ${WHITE}INSTALLING HENI JOHN PREMIUM VPN${NC}       ${PURPLE}║${NC}"
+echo -e "${PURPLE}╚══════════════════════════════════════════════╝${NC}"
 echo ""
 
 # 1. Update system & install required packages
-print_status "Phase 1: Installing system packages & dependencies..."
+echo -e "${CYAN}[⚡] Phase 1: Installing system packages...${NC}"
 apt-get update -y > /dev/null 2>&1
-apt-get install -y curl wget tmux dnsutils stunnel4 squid dropbear openssl ufw net-tools screen zip unzip bc > /dev/null 2>&1
+apt-get install -y curl wget tmux dnsutils stunnel4 squid dropbear openssl ufw net-tools screen zip unzip bc python3 > /dev/null 2>&1
 
-# 2. Configure Login Banner (For HTTP Injector & SSH Log)
-print_status "Phase 2: Deploying professional login banner..."
+# 2. Configure Default Login Banner
+echo -e "${CYAN}[⚡] Phase 2: Deploying login banner...${NC}"
 cat <<EOF > /etc/issue.net
 ====================================================================
           WELCOME TO HENI JOHN SECURE CLOUD INFRASTRUCTURE          
                Developed By Henok Yonatan (Heni John)             
 ====================================================================
- Unauthorized access or abuse of this server is strictly prohibited.
- Official Developer Channel & Support:
- Telegram: https://t.me/Heni_John
-====================================================================
 EOF
 
 # 3. Configure Dropbear (Port 109)
-print_status "Phase 3: Configuring Dropbear backend service..."
+echo -e "${CYAN}[⚡] Phase 3: Configuring Dropbear backend service...${NC}"
 cat <<EOF > /etc/default/dropbear
 NO_START=0
 DROPBEAR_PORT=109
@@ -69,7 +46,7 @@ systemctl enable dropbear > /dev/null 2>&1
 systemctl restart dropbear
 
 # 4. Configure Stunnel (Port 444 -> 109)
-print_status "Phase 4: Setting up SSL/TLS Stunnel wrapper..."
+echo -e "${CYAN}[⚡] Phase 4: Setting up SSL/TLS Stunnel wrapper...${NC}"
 cat <<EOF > /etc/stunnel/stunnel.conf
 pid = /var/run/stunnel.pid
 cert = /etc/stunnel/stunnel.pem
@@ -78,19 +55,17 @@ cert = /etc/stunnel/stunnel.pem
 accept = 444
 connect = 127.0.0.1:109
 EOF
-
 openssl req -new -x509 -days 3650 -nodes \
     -out /etc/stunnel/stunnel.pem \
     -keyout /etc/stunnel/stunnel.pem \
-    -subj "/CN=Henok-Yonatan-Heni-John" 2>/dev/null
-
+    -subj "/CN=HeniJohn" 2>/dev/null
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 systemctl daemon-reload
 systemctl enable stunnel4 > /dev/null 2>&1
 systemctl restart stunnel4
 
 # 5. Configure Squid Proxy (Port 8080)
-print_status "Phase 5: Configuring high-speed Squid proxy..."
+echo -e "${CYAN}[⚡] Phase 5: Configuring high-speed Squid proxy...${NC}"
 cat <<EOF > /etc/squid/squid.conf
 http_port 8080
 http_access allow all
@@ -98,166 +73,265 @@ EOF
 systemctl enable squid > /dev/null 2>&1
 systemctl restart squid
 
-# 6. Enforce SSH Security & Banner
+# Enforce SSH Security & Banner
 sed -i '/Banner/d' /etc/ssh/sshd_config
 echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null
 
-# 7. Create Ultimate Control Menu (`/usr/local/bin/menu`)
-print_status "Phase 6: Generating Ultimate Interactive Menu System..."
+# 6. Create the Modern Menu (`/usr/local/bin/menu`)
+echo -e "${CYAN}[⚡] Phase 6: Generating Modern UI Menu System...${NC}"
 cat << 'EOF' > /usr/local/bin/menu
 #!/bin/bash
+# ====================================================================
+# HENI JOHN SERVER PANEL — Modern Terminal UI (v2)
+# ====================================================================
+
+CYAN='\033[38;5;80m'
+TEAL='\033[38;5;115m'
+PURPLE='\033[38;5;140m'
+GREEN='\033[38;5;114m'
+AMBER='\033[38;5;222m'
+RED='\033[38;5;210m'
+BLUE='\033[38;5;110m'
+GRAY='\033[38;5;245m'
+WHITE='\033[1;97m'
+BOLD='\033[1m'
+DIM='\033[2m'
+NC='\033[0m'
+
+draw_header() {
+    clear
+    C1='\033[38;5;123m'; C2='\033[38;5;117m'; C3='\033[38;5;111m'; C4='\033[38;5;105m'
+    C5='\033[38;5;141m'; C6='\033[38;5;177m'; C7='\033[38;5;213m'; C8='\033[38;5;218m'
+    echo -e "${PURPLE}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${PURPLE}║${NC}"
+    echo -e "${PURPLE}║${NC}   ${C1}${BOLD}𝗛${NC}${C2}${BOLD}𝗘${NC}${C3}${BOLD}𝗡${NC}${C4}${BOLD}𝗜${NC}  ${C5}${BOLD}𝗝${NC}${C6}${BOLD}𝗢${NC}${C7}${BOLD}𝗛${NC}${C8}${BOLD}𝗡${NC}"
+    echo -e "${PURPLE}║${NC}   ${DIM}${TEAL}s e r v e r   p a n e l${NC}"
+    echo -e "${PURPLE}║${NC}"
+    echo -e "${PURPLE}║${NC}   ${GREEN}✦${NC} ${WHITE}Server management panel${NC}"
+    echo -e "${PURPLE}║${NC}   ${DIM}Support · Telegram${NC} ${TEAL}@Heni_John${NC}"
+    echo -e "${PURPLE}╚══════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
+row() {
+    local n1="$1" c1="$2" l1="$3" n2="$4" c2="$5" l2="$6"
+    printf " ${DIM}[%2s]${NC} ${!c1}%-22s${NC} ${DIM}[%2s]${NC} ${!c2}%s${NC}\n" \
+        "$n1" "$l1" "$n2" "$l2"
+}
+
+draw_menu() {
+    draw_header
+    row " 1" GREEN "⊕ Create account"       " 8" TEAL  "↻ Restart services"
+    row " 2" AMBER "◷ Trial account (1d)"   " 9" BLUE  "▥ Server status"
+    row " 3" RED   "⊗ Delete account"       "10" AMBER "⚡ Speedtest"
+    row " 4" BLUE  "☰ List users"           "11" TEAL  "♲ Clear RAM cache"
+    row " 5" PURPLE"● Online users"         "12" RED   "⏻ Reboot server"
+    row " 6" GREEN "⤢ Extend expiry"        "13" PURPLE"⚿ Change SSL/domain"
+    row " 7" CYAN  "✎ Login banner"         " 0" RED   "✕ Exit"
+    echo ""
+    echo -e "${GRAY}──────────────────────────────────────────────${NC}"
+}
+
 while true; do
-clear
-echo -e "\033[1;35m╔══════════════════════════════════════════════════════════════════╗\033[0m"
-echo -e "\033[1;36m             HENI JOHN ADVANCED SERVER MANAGEMENT MENU            \033[0m"
-echo -e "\033[1;33m   Developer: Henok Yonatan (Heni John) | tg: @Heni_John        \033[0m"
-echo -e "\033[1;35m╚══════════════════════════════════════════════════════════════════╝\033[0m"
-echo -e " \033[1;32m[1]\033[0m Create SSH / Stunnel Account    \033[1;32m[7]\033[0m Restart All Services"
-echo -e " \033[1;32m[2]\033[0m Create Trial Account (1 Day)    \033[1;32m[8]\033[0m Server RAM & Status Info"
-echo -e " \033[1;32m[3]\033[0m Delete SSH Account              \033[1;32m[9]\033[0m Speedtest Benchmark"
-echo -e " \033[1;32m[4]\033[0m List All Registered Users       \033[1;32m[10]\033[0m Clear RAM Cache & Optimize"
-echo -e " \033[1;32m[5]\033[0m Check Online Users (Dropbear)   \033[1;32m[11]\033[0m Reboot Server"
-echo -e " \033[1;32m[6]\033[0m Extend Account Expiry Days      \033[1;32m[12]\033[0m Change Domain / SSL Cert"
-echo -e " \033[1;31m[0]\033[0m Exit Menu"
-echo -e "\033[1;35m══════════════════════════════════════════════════════════════════\033[0m"
-read -p " Select option [0-12]: " choice
+draw_menu
+read -p " Select option [0-13]: " choice
 
 case $choice in
     1)
         clear
-        echo -e "\033[1;36m--- Create SSH / Stunnel Account ---\033[0m"
-        read -p " Enter Username: " username
+        echo -e "${GREEN}⊕ Create SSH / Stunnel account${NC}"
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        read -p " Username: " username
         if id "$username" &>/dev/null; then
-            echo -e "\033[1;31m Error: User $username already exists!\033[0m"
+            echo -e "${RED}✗ User $username already exists${NC}"
         else
-            read -p " Enter Password: " password
-            read -p " Active Duration (Days): " days
+            read -s -p " Password: " password
+            echo ""
+            read -p " Active duration (days): " days
             useradd -e "$(date -d "+$days days" +"%Y-%m-%d")" -s /bin/false -M "$username"
             echo "$username:$password" | chpasswd
-            echo -e "\n\033[1;32m✔ Account Created Successfully!\033[0m"
-            echo -e " ────────────────────────────────────────"
-            echo -e " • Username   : $username"
-            echo -e " • Password   : $password"
-            echo -e " • SSL Port   : 444"
-            echo -e " • Dropbear   : 109"
-            echo -e " • Squid Proxy: 8080"
-            echo -e " • Expires in : $days Days"
-            echo -e " ────────────────────────────────────────"
+            echo ""
+            echo -e "${GREEN}✓ Account created${NC}"
+            echo -e "${GRAY}──────────────────────────────${NC}"
+            printf " %-10s %s\n" "Username" "$username"
+            printf " %-10s %s\n" "SSL port" "444"
+            printf " %-10s %s\n" "Dropbear" "109"
+            printf " %-10s %s\n" "Squid" "8080"
+            printf " %-10s %s\n" "Expires" "$days days"
         fi
-        read -n 1 -s -r -p "Press any key to continue..."
+        read -n 1 -s -r -p " press any key..."
         ;;
     2)
         clear
         username="trial$RANDOM"
-        password="123"
+        password=$(openssl rand -base64 6)
         useradd -e "$(date -d "+1 days" +"%Y-%m-%d")" -s /bin/false -M "$username"
         echo "$username:$password" | chpasswd
-        echo -e "\033[1;32m✔ Trial Account Created Successfully!\033[0m"
-        echo -e " • Username   : $username"
-        echo -e " • Password   : $password"
-        echo -e " • Expires in : 1 Day"
-        read -n 1 -s -r -p "Press any key to continue..."
+        echo -e "${AMBER}◷ Trial account created${NC}"
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        printf " %-10s %s\n" "Username" "$username"
+        printf " %-10s %s\n" "Password" "$password"
+        printf " %-10s %s\n" "Expires" "1 day"
+        read -n 1 -s -r -p " press any key..."
         ;;
     3)
         clear
-        echo -e "\033[1;31m--- Delete Account ---\033[0m"
-        read -p " Enter Username to delete: " username
+        echo -e "${RED}⊗ Delete account${NC}"
+        read -p " Username to delete: " username
         if id "$username" &>/dev/null; then
             userdel -r "$username"
-            echo -e "\033[1;32m✔ Account $username deleted successfully!\033[0m"
+            echo -e "${GREEN}✓ Deleted $username${NC}"
         else
-            echo -e "\033[1;31m Error: User does not exist!\033[0m"
+            echo -e "${RED}✗ User not found${NC}"
         fi
-        read -n 1 -s -r -p "Press any key to continue..."
+        read -n 1 -s -r -p " press any key..."
         ;;
     4)
         clear
-        echo -e "\033[1;33m--- Registered User Accounts ---\033[0m"
-        awk -F: '$3 >= 1000 {print " - " $1}' /etc/passwd
-        read -n 1 -s -r -p "Press any key to continue..."
+        echo -e "${BLUE}☰ Registered users${NC}"
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        awk -F: '$3 >= 1000 && $1 != "nobody" {print " · " $1}' /etc/passwd
+        read -n 1 -s -r -p " press any key..."
         ;;
     5)
         clear
-        echo -e "\033[1;33m--- Online Dropbear & SSH Users ---\033[0m"
-        netstat -anp | grep :109 | grep ESTABLISHED || echo "No active sessions found."
-        read -n 1 -s -r -p "Press any key to continue..."
+        echo -e "${PURPLE}● Online dropbear/SSH users${NC}"
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        netstat -anp 2>/dev/null | grep :109 | grep ESTABLISHED || echo " No active sessions"
+        read -n 1 -s -r -p " press any key..."
         ;;
     6)
         clear
-        read -p " Enter Username to extend: " username
+        read -p " Username to extend: " username
         if id "$username" &>/dev/null; then
-            read -p " Add extra days: " days
+            read -p " Extra days: " days
             chage -E "$(date -d "+$days days" +"%Y-%m-%d")" "$username"
-            echo -e "\033[1;32m✔ Account $username extended by $days days!\033[0m"
+            echo -e "${GREEN}✓ Extended by $days days${NC}"
         else
-            echo -e "\033[1;31m Error: User not found!\033[0m"
+            echo -e "${RED}✗ User not found${NC}"
         fi
-        read -n 1 -s -r -p "Press any key to continue..."
+        read -n 1 -s -r -p " press any key..."
         ;;
     7)
         clear
-        print_status "Restarting core services..."
-        systemctl restart stunnel4 dropbear squid ssh
-        echo -e "\033[1;32m✔ All services restarted successfully!\033[0m"
-        sleep 1
+        echo -e "${CYAN}✎ Login banner${NC}"
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        echo -e "${DIM}Current banner:${NC}"
+        cat /etc/issue.net 2>/dev/null
+        echo ""
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        echo -e " ${TEAL}[1]${NC} ✎ Edit banner (append a line)"
+        echo -e " ${RED}[2]${NC} ⊗ Delete banner"
+        echo -e " ${BLUE}[3]${NC} ⊕ Set new banner (overwrite)"
+        echo -e " ${GREEN}[4]${NC} ★ Default banner (Heni John)"
+        echo -e "${GRAY}──────────────────────────────${NC}"
+        read -p " Choose [1-4]: " bchoice
+        case $bchoice in
+            1)
+                read -p " Line to add: " extraline
+                if [ -n "$extraline" ]; then
+                    printf '%s\n' "$extraline" >> /etc/issue.net
+                    echo -e "${GREEN}✓ Line added to banner${NC}"
+                else
+                    echo -e "${RED}✗ Nothing entered${NC}"
+                fi
+                ;;
+            2)
+                read -p " Delete the whole banner? (y/n): " confirm
+                if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                    : > /etc/issue.net
+                    echo -e "${GREEN}✓ Banner deleted${NC}"
+                else
+                    echo -e "${DIM}Cancelled${NC}"
+                fi
+                ;;
+            3)
+                echo -e "${DIM}Type your new banner text. Finish with an empty line.${NC}"
+                newbanner=""
+                while IFS= read -r line; do
+                    [ -z "$line" ] && break
+                    newbanner+="$line"$'\n'
+                done
+                if [ -n "$newbanner" ]; then
+                    printf '%s' "$newbanner" > /etc/issue.net
+                    echo -e "${GREEN}✓ Banner replaced${NC}"
+                else
+                    echo -e "${RED}✗ No text entered, banner unchanged${NC}"
+                fi
+                ;;
+            4)
+                printf "%b" "\033[1;36m✨ WELCOME TO HENI JOHN ✨\033[0m\n\n\033[1;32m🚀 Premium Server Connection 🚀\033[0m\n\n\033[1;33m📩 Creator: @Heni_John\033[0m\n\n\033[1;31m🔻 JOIN OUR MAIN CHANNEL 🔻\033[0m\n\033[1;34m🌐 https://t.me/Heni_Tech24\033[0m\n\n\033[1;35m📢 Channel keenya Share, Like fi Comment gochuu hin dagatinaa.\033[0m\n\033[1;35m📢 ቻናላችንን Share, Like እና Comment ማድረግን አይርሱ።\033[0m\n\n\033[1;32m© Henok Yonatan (Heni John)\033[0m\n" > /etc/issue.net
+                echo -e "${GREEN}✓ Default banner applied${NC}"
+                ;;
+            *)
+                echo -e "${RED}✗ Invalid choice, banner unchanged${NC}"
+                ;;
+        esac
+        read -n 1 -s -r -p " press any key..."
         ;;
     8)
         clear
-        echo -e "\033[1;36m--- Server System & RAM Status ---\033[0m"
+        echo -e "${TEAL}↻ Restarting services...${NC}"
+        systemctl restart stunnel4 dropbear squid ssh 2>/dev/null
+        echo -e "${GREEN}✓ Done${NC}"
+        sleep 1
+        ;;
+    9)
+        clear
+        echo -e "${BLUE}▥ Server status${NC}"
+        echo -e "${GRAY}──────────────────────────────${NC}"
         uptime
         echo ""
         free -m
         echo ""
         df -h /
-        read -n 1 -s -r -p "Press any key to continue..."
+        read -n 1 -s -r -p " press any key..."
         ;;
-    9)
+    10)
         clear
-        echo -e "\n\033[1;36m Running Speedtest Benchmark... \033[0m\n"
+        echo -e "${AMBER}⚡ Speedtest benchmark${NC}"
+        echo -e "${DIM}Running test, please wait...${NC}\n"
         if command -v speedtest &> /dev/null; then
             speedtest
         else
             curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 -
         fi
-        read -n 1 -s -r -p "Press any key to continue..."
-        ;;
-    10)
-        clear
-        print_status "Clearing RAM cache and swap..."
-        sync; echo 3 > /proc/sys/vm/drop_caches
-        swapoff -a && swapon -a
-        echo -e "\033[1;32m✔ RAM cache cleaned and system optimized!\033[0m"
-        sleep 1
+        read -n 1 -s -r -p " press any key..."
         ;;
     11)
-        read -p " Are you sure you want to reboot the server? (y/n): " confirm
-        if [[ "$confirm" =~ ^[Yy]$ ]]; then
-            echo -e "\033[1;31m Rebooting server... Please wait.\033[0m"
-            reboot
-        fi
+        clear
+        echo -e "${TEAL}♲ Clearing RAM cache...${NC}"
+        sync; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null
+        swapoff -a && swapon -a
+        echo -e "${GREEN}✓ Done${NC}"
+        sleep 1
         ;;
     12)
+        read -p " Reboot server now? (y/n): " confirm
+        [[ "$confirm" =~ ^[Yy]$ ]] && { echo -e "${RED}Rebooting...${NC}"; reboot; }
+        ;;
+    13)
         clear
-        echo -e "\033[1;36m--- Change Domain / SSL Certificate ---\033[0m"
-        read -p " Enter your domain name (e.g., vpn.henijohn.com): " newdomain
+        echo -e "${PURPLE}⚿ Change domain / SSL certificate${NC}"
+        read -p " Domain (e.g. vpn.example.com): " newdomain
         if [ -z "$newdomain" ]; then
-            echo -e "\033[1;31m Error: Domain name cannot be empty!\033[0m"
+            echo -e "${RED}✗ Domain cannot be empty${NC}"
         else
             openssl req -new -x509 -days 3650 -nodes \
                 -out /etc/stunnel/stunnel.pem \
                 -keyout /etc/stunnel/stunnel.pem \
                 -subj "/CN=$newdomain" 2>/dev/null
             systemctl restart stunnel4
-            echo -e "\033[1;32m✔ Stunnel SSL Certificate successfully updated for domain: $newdomain\033[0m"
+            echo -e "${GREEN}✓ Updated for $newdomain${NC}"
         fi
-        read -n 1 -s -r -p "Press any key to continue..."
+        read -n 1 -s -r -p " press any key..."
         ;;
     0)
         exit 0
         ;;
     *)
-        echo -e "\033[1;31m Invalid option! Please select between 0 and 12.\033[0m"
+        echo -e "${RED}✗ Invalid option${NC}"
         sleep 1
         ;;
 esac
@@ -266,14 +340,14 @@ EOF
 
 chmod +x /usr/local/bin/menu
 
-# Final Success Dashboard
-echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}${BOLD}║           ADVANCED SCRIPT & MENU INSTALLED SUCCESSFULLY!         ║${NC}"
-echo -e "${GREEN}${BOLD}╠══════════════════════════════════════════════════════════════════╝${NC}"
+# Final Success Output
+clear
+echo -e "${GREEN}╔══════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║     ✓ INSTALLATION COMPLETED SUCCESSFULLY    ║${NC}"
+echo -e "${GREEN}╚══════════════════════════════════════════════╝${NC}"
 echo -e "${CYAN} • Command to open panel : ${WHITE}menu${NC}"
 echo -e "${CYAN} • Stunnel SSL Port      : ${WHITE}444${NC}"
 echo -e "${CYAN} • Dropbear Port         : ${WHITE}109${NC}"
 echo -e "${CYAN} • Squid Proxy Port      : ${WHITE}8080${NC}"
-echo -e "${CYAN} • Developer Contact     : ${BLUE}https://t.me/Heni_John${NC}"
-echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${CYAN} • Developer Contact     : ${PURPLE}https://t.me/Heni_John${NC}"
 echo ""
